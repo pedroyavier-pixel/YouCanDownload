@@ -1,6 +1,7 @@
 """Structured subprocess events; yt-dlp never handles arbitrary user options."""
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -103,7 +104,8 @@ def main():
         height = max(s.get("height", 0) for s in streams)
         emit("ready", path=str(media.resolve()), data={"height": height, "size_bytes": media.stat().st_size, "extension": media.suffix[1:]})
     except Exception as exc:
-        emit("error", message=public_error(exc))
+        diagnostic = re.sub(r'https?://\S+', '[URL]', str(exc))[:1200]
+        emit("error", message=public_error(exc), diagnostic=diagnostic)
         sys.exit(1)
 
 

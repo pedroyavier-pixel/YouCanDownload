@@ -1,3 +1,2 @@
-// GitHub Pages cannot run downloads. Set this to your deployed Docker service's
-// HTTPS origin to send visitors there. On the Docker service, leave it empty.
-window.YCD_ENGINE_URL = "";
+// La versión Docker sirve la aplicación completa en este origen.
+window.YCD_ENGINE_URL = "https://youcandownload.onrender.com";

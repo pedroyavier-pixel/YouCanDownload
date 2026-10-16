@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass, field
 import hmac
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -109,6 +110,7 @@ async def run_job(job):
                 elif kind == "merging":
                     job.status = "merging"
                 elif kind == "error":
+                    logging.warning("YouCanDownload worker: %s", event.get("diagnostic", "Unknown download error"))
                     job.error = event["message"]
                     job.status = "error"
                 elif kind == "ready":
