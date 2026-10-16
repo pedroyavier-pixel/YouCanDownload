@@ -3,6 +3,7 @@ import asyncio
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass, field
 import hmac
+import ipaddress
 import json
 import logging
 import os
@@ -16,7 +17,7 @@ import time
 from urllib.parse import parse_qs, urlparse
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).parent
@@ -26,6 +27,9 @@ TIMEOUT = int(os.getenv("JOB_TIMEOUT_SECONDS", "1800"))
 TTL = int(os.getenv("FILE_TTL_SECONDS", "3600"))
 MAX_BYTES = int(os.getenv("MAX_FILE_BYTES", "1073741824"))
 ACCESS_CODE = os.getenv("APP_ACCESS_CODE", "")
+LOCAL_MODE = os.getenv("YCD_LOCAL", "0") == "1"
+LOCAL_HOSTS = set(os.getenv("YCD_ALLOWED_HOSTS", "127.0.0.1,localhost").split(","))
+LAN_NETWORKS = tuple(ipaddress.ip_network(n) for n in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
 COOKIE = "ycd_session"
 HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be", "www.youtube-nocookie.com"}
 
@@ -178,6 +182,17 @@ app = FastAPI(title="YouCanDownload", lifespan=lifespan, docs_url=None, redoc_ur
 
 @app.middleware("http")
 async def protect(request: Request, call_next):
+    if LOCAL_MODE:
+        # Restrict the native helper to loopback/private LAN clients and explicit
+        # local hostnames. This also blocks browser DNS-rebinding requests.
+        hostname = urlparse("//" + request.headers.get("host", "")).hostname
+        try:
+            address = ipaddress.ip_address(request.client.host)
+            local_client = address.is_loopback or any(address in n for n in LAN_NETWORKS)
+        except (ValueError, AttributeError):
+            local_client = False
+        if hostname not in LOCAL_HOSTS or not local_client:
+            return JSONResponse({"detail": "Este servidor solo admite acceso local."}, status_code=403)
     if request.method in {"POST", "DELETE"}:
         origin = request.headers.get("origin")
         if origin and urlparse(origin).netloc != request.headers.get("host"):
@@ -214,7 +229,8 @@ async def health(request: Request):
     import importlib.util
     ready = all(shutil.which(x) for x in ("ffmpeg", "ffprobe", "node")) and importlib.util.find_spec("yt_dlp") is not None
     unlocked = not ACCESS_CODE or hmac.compare_digest(request.cookies.get("ycd_access", ""), hmac.digest(ACCESS_CODE.encode(), request.state.session.encode(), "sha256").hex())
-    return {"ready": ready, "locked": not unlocked}
+    return {"ready": ready, "locked": not unlocked, "application": "YouCanDownload", "local": LOCAL_MODE,
+            "shared": LOCAL_MODE and os.getenv("YCD_SHARED", "0") == "1"}
 
 
 @app.post("/api/unlock")
@@ -306,4 +322,6 @@ async def home():
 async def asset(asset: str):
     if asset not in {"app.js", "config.js", "style.css", "icon.svg"}:
         raise HTTPException(404, "No encontrado.")
+    if asset == "config.js" and LOCAL_MODE:
+        return Response('window.YCD_ENGINE_URL = "";\n', media_type="application/javascript", headers={"Cache-Control": "no-store"})
     return FileResponse(ROOT / asset)

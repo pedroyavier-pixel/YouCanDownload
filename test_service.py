@@ -82,6 +82,30 @@ def test_origin_and_input_validation(client):
     assert client.post("/api/jobs", json={"url":"https://127.0.0.1"}).status_code == 422
 
 
+def test_local_mode_serves_no_remote_redirect(monkeypatch):
+    monkeypatch.setattr(main, "LOCAL_MODE", True)
+    monkeypatch.setattr(main, "LOCAL_HOSTS", {"localhost", "127.0.0.1"})
+    with TestClient(main.app, base_url="http://localhost", client=("127.0.0.1", 12345)) as local:
+        response = local.get("/config.js")
+        assert response.status_code == 200
+        assert 'window.YCD_ENGINE_URL = "";' in response.text
+        assert "onrender.com" not in response.text
+        assert local.get("/api/health").json()["local"] is True
+        assert local.get("/", headers={"Host":"attacker.example"}).status_code == 403
+
+
+@pytest.mark.parametrize("client_address,host,allowed", [
+    ("192.168.1.25", "192.168.1.20", True),
+    ("203.0.113.25", "192.168.1.20", False),
+    ("192.168.1.25", "attacker.example", False),
+])
+def test_local_mode_private_network_boundary(monkeypatch, client_address, host, allowed):
+    monkeypatch.setattr(main, "LOCAL_MODE", True)
+    monkeypatch.setattr(main, "LOCAL_HOSTS", {"localhost", "127.0.0.1", "192.168.1.20"})
+    with TestClient(main.app, base_url="http://" + host, client=(client_address, 12345)) as local:
+        assert local.get("/").status_code == (200 if allowed else 403)
+
+
 def test_optional_access_code(client, monkeypatch):
     monkeypatch.setattr(main, "ACCESS_CODE", "test-private-code")
     assert client.get("/api/health").json()["locked"] is True
