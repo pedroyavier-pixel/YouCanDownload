@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="Pega un enlace de YouTube. Descarga tu video con audio en la mejor calidad disponible.">
+  <title>YouCanDownload — Tu video, en su mejor versión.</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./config.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="YouCanDownload, inicio"><img src="./icon.svg" alt="" width="34" height="34"><span>YouCan<span class="brand-light">Download</span></span></a>
+    <span class="top-note"><span class="dot"></span> Simple por naturaleza.</span>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="headline">
+      <div class="eyebrow"><span class="mini-play">▶</span> DE YOUTUBE A TU DISPOSITIVO</div>
+      <h1 id="headline">Tu video.<br><span>En su mejor versión.</span></h1>
+      <p class="intro">Pega el enlace. Nosotros buscamos la mejor calidad<br class="desktop"> y unimos el audio. Así de fácil.</p>
+      <div class="quality-pills" aria-label="Calidad automática"><span>1080p</span><span>4K</span><span>8K</span><i></i><span class="with-audio">♫ Audio incluido</span></div>
+
+      <div id="service-notice" class="notice" role="status" hidden></div>
+      <form id="download-form" class="download-box" novalidate>
+        <label for="url">EL ENLACE, POR AQUÍ</label>
+        <div class="input-row">
+          <span class="link-icon" aria-hidden="true">↗</span>
+          <input id="url" name="url" type="url" inputmode="url" placeholder="Pega tu enlace de YouTube…" autocomplete="off" spellcheck="false" aria-describedby="input-help message">
+          <button id="paste" type="button" class="paste">Pegar</button>
+        </div>
+        <button id="submit" type="submit" class="primary"><span>Descargar video</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <p id="input-help" class="input-help"><span>✦</span> Al pegar un enlace válido, comenzamos automáticamente.</p>
+      </form>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+
+      <section id="job-card" class="job-card" aria-label="Tu descarga" hidden>
+        <div class="video-top"><img id="thumbnail" alt="Miniatura del video" hidden><div><span id="job-label" class="job-label">RECONOCIENDO ENLACE</span><h2 id="video-title">Buscando tu video…</h2><p id="video-meta">Un momento, por favor.</p></div></div>
+        <div class="progress-heading"><span id="stage">Reconociendo video</span><span id="percent"></span></div>
+        <progress id="progress" max="100" aria-label="Progreso de la pista actual"></progress>
+        <p id="progress-detail" class="progress-detail">Buscando la mejor resolución disponible.</p>
+        <div class="job-actions"><a id="download-link" class="primary save" hidden>Guardar video ↓</a><button id="cancel" type="button" class="text-button">Cancelar descarga</button><button id="another" type="button" class="text-button" hidden>Descargar otro video ↗</button></div>
+      </section>
+
+      <p class="quality-note">La calidad depende del video original. Siempre elegimos la mejor disponible.</p>
+    </section>
+    <section class="how" aria-label="Cómo funciona">
+      <article><span class="step">01</span><h3>Un enlace.</h3><p>Videos y Shorts de YouTube.<br>Solo copia y pega.</p></article>
+      <article><span class="step">02</span><h3>La mejor calidad.</h3><p>Resolución automática.<br>Sin tener que elegir.</p></article>
+      <article><span class="step">03</span><h3>Todo junto.</h3><p>Video y audio.<br>Un solo archivo para guardar.</p></article>
+    </section>
+  </main>
+  <footer><span>YouCanDownload <span class="footer-mark">↘</span></span><p>Menos pasos. Más play.</p></footer>
+  <dialog id="unlock-dialog"><form id="unlock-form"><h2>Tu espacio de descargas.</h2><p>Introduce la clave de acceso para continuar.</p><label for="access-code">Clave de acceso</label><input type="password" id="access-code" autocomplete="current-password" required><button class="primary" type="submit">Entrar →</button><p id="unlock-message" role="status"></p></form></dialog>
+</body>
+</html>

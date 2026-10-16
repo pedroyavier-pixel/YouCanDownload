@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: youcandownload
+    runtime: docker
+    plan: free
+    numInstances: 1
+    healthCheckPath: /api/health
+    envVars:
+      - key: MAX_ACTIVE_JOBS
+        value: "1"
+      - key: MAX_FILE_BYTES
+        value: "1073741824"
+      - key: MAX_DURATION_SECONDS
+        value: "7200"
+      - key: FILE_TTL_SECONDS
+        value: "3600"
+      - key: APP_ACCESS_CODE
+        sync: false
