@@ -4,6 +4,8 @@ Una interfaz sencilla: pega un enlace de YouTube y se prepara automáticamente u
 
 ## Estado
 
+**Verificación del 16 de octubre de 2026:** el servicio está desplegado en el plan gratuito de Render en https://youcandownload.onrender.com/ y GitHub Pages redirige a esa aplicación. La descarga real de prueba (`YE7VzlLtp-4`, Blender) falló porque YouTube respondió «Sign in to confirm you’re not a bot». Se repitió la verificación con yt-dlp nightly `2026.10.10.233141`, con el mismo resultado. **No se ha verificado ninguna descarga real exitosa desde este servidor; el objetivo funcional sigue pendiente.** No se han añadido cookies, proxies ni mecanismos para eludir esa verificación.
+
 El código incluye la interfaz y el servidor de descargas. **Publicar los archivos en GitHub Pages no activa las descargas:** Pages solo sirve HTML, CSS y JavaScript. Se necesita desplegar el servidor Docker incluido. No hay una API externa pública ni descargas simuladas.
 
 ## Publicar online desde este repositorio
